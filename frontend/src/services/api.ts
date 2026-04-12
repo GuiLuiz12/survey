@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { IRequirement, ISurveyPayload, IRadarDataResponse } from '../types';
+import type { IRequirement, IProfilingQuestion, ISurveyPayload, IRadarDataResponse } from '../types';
 
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -7,6 +7,11 @@ const client = axios.create({
 
 export async function getRequirements(): Promise<IRequirement[]> {
   const { data } = await client.get<IRequirement[]>('/api/requirements');
+  return data;
+}
+
+export async function getProfilingQuestions(): Promise<IProfilingQuestion[]> {
+  const { data } = await client.get<IProfilingQuestion[]>('/api/profiling');
   return data;
 }
 

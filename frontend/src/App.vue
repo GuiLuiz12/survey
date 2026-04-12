@@ -1,20 +1,38 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import ProfilingForm from './components/ProfilingForm.vue'
 import SurveyForm from './components/SurveyForm.vue'
 import RadarChart from './components/RadarChart.vue'
-import type { IRadarDataResponse } from './types'
+import type { IRadarDataResponse, ICompanyProfile } from './types'
 
-const radarData = ref<IRadarDataResponse | null>(null)
+type Step = 'profiling' | 'assessment' | 'results'
+
+const step = ref<Step>('profiling')
 const companyName = ref('')
+const profile = ref<ICompanyProfile>({})
+const radarData = ref<IRadarDataResponse | null>(null)
+
+function handleProfilingCompleted(name: string, p: ICompanyProfile) {
+  companyName.value = name
+  profile.value = p
+  step.value = 'assessment'
+}
 
 function handleSubmitted(data: IRadarDataResponse, name: string) {
   radarData.value = data
   companyName.value = name
+  step.value = 'results'
+}
+
+function handleBack() {
+  step.value = 'profiling'
 }
 
 function handleReset() {
   radarData.value = null
   companyName.value = ''
+  profile.value = {}
+  step.value = 'profiling'
 }
 </script>
 
@@ -37,14 +55,25 @@ function handleReset() {
     </header>
 
     <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      <ProfilingForm
+        v-if="step === 'profiling'"
+        @completed="handleProfilingCompleted"
+      />
+      <SurveyForm
+        v-else-if="step === 'assessment'"
+        :company-name="companyName"
+        :profile="profile"
+        @submitted="handleSubmitted"
+        @back="handleBack"
+      />
       <RadarChart
-        v-if="radarData"
+        v-else-if="step === 'results' && radarData"
         :categories="radarData.radarData.categories"
         :scores="radarData.radarData.scores"
+        :coverage="radarData.radarData.coverage"
         :company-name="companyName"
         @reset="handleReset"
       />
-      <SurveyForm v-else @submitted="handleSubmitted" />
     </main>
   </div>
 </template>

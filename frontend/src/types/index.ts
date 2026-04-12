@@ -1,12 +1,25 @@
 export interface IRequirement {
   id: string;
+  category: string;
   question: string;
   expectedEvidence: string;
 }
 
+export interface IProfilingQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  multiSelect: boolean;
+}
+
+export interface ICompanyProfile {
+  [key: string]: string | string[];
+}
+
 export interface ISurveyPayload {
   companyName: string;
-  answers: Record<string, number>;
+  profile: ICompanyProfile;
+  answers: Record<string, number | null>;
 }
 
 export interface IRadarDataResponse {
@@ -14,5 +27,6 @@ export interface IRadarDataResponse {
   radarData: {
     categories: string[];
     scores: number[];
+    coverage: number[];
   };
 }

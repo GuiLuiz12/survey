@@ -4,6 +4,7 @@ import { computed } from 'vue'
 const props = defineProps<{
   categories: string[]
   scores: number[]
+  coverage: number[]
   companyName: string
 }>()
 
@@ -16,6 +17,10 @@ const categoryLabels: Record<string, string> = {
   PS: 'Protect the Software',
   PW: 'Produce Well-Secured Software',
   RV: 'Respond to Vulnerabilities',
+}
+
+function coveragePercent(idx: number): string {
+  return `${Math.round(props.coverage[idx] * 100)}%`
 }
 
 const chartOptions = computed(() => ({
@@ -64,7 +69,10 @@ const chartOptions = computed(() => ({
   },
   tooltip: {
     y: {
-      formatter: (val: number) => `${val} / 5`,
+      formatter: (val: number, opts: { dataPointIndex: number }) => {
+        const cov = coveragePercent(opts.dataPointIndex)
+        return `${val} / 5 (${cov} coverage)`
+      },
     },
   },
   plotOptions: {
@@ -109,6 +117,7 @@ const series = computed(() => [
         <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600 mb-1">{{ cat }}</p>
         <p class="text-3xl font-bold text-slate-800">{{ scores[idx] }}</p>
         <p class="mt-1 text-xs text-slate-400">{{ categoryLabels[cat] }}</p>
+        <p class="mt-1 text-xs font-medium text-slate-500">Coverage: {{ coveragePercent(idx) }}</p>
       </div>
     </div>
 
