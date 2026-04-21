@@ -3,24 +3,26 @@ import { ref } from 'vue'
 import ProfilingForm from './components/ProfilingForm.vue'
 import SurveyForm from './components/SurveyForm.vue'
 import RadarChart from './components/RadarChart.vue'
-import type { IRadarDataResponse, ICompanyProfile } from './types'
+import SiteFooter from './components/SiteFooter.vue'
+import type { IRadarDataResponse, ISurveyContext } from './types'
 
 type Step = 'profiling' | 'assessment' | 'results'
 
 const step = ref<Step>('profiling')
-const companyName = ref('')
-const profile = ref<ICompanyProfile>({})
-const radarData = ref<IRadarDataResponse | null>(null)
+const surveyContext = ref<ISurveyContext>({
+  companyName: undefined,
+  contactEmail: undefined,
+  profile: {},
+})
+const submissionResult = ref<IRadarDataResponse | null>(null)
 
-function handleProfilingCompleted(name: string, p: ICompanyProfile) {
-  companyName.value = name
-  profile.value = p
+function handleProfilingCompleted(context: ISurveyContext) {
+  surveyContext.value = context
   step.value = 'assessment'
 }
 
-function handleSubmitted(data: IRadarDataResponse, name: string) {
-  radarData.value = data
-  companyName.value = name
+function handleSubmitted(data: IRadarDataResponse) {
+  submissionResult.value = data
   step.value = 'results'
 }
 
@@ -29,15 +31,18 @@ function handleBack() {
 }
 
 function handleReset() {
-  radarData.value = null
-  companyName.value = ''
-  profile.value = {}
+  submissionResult.value = null
+  surveyContext.value = {
+    companyName: undefined,
+    contactEmail: undefined,
+    profile: {},
+  }
   step.value = 'profiling'
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50">
+  <div class="flex min-h-screen flex-col bg-slate-50">
     <header class="border-b border-slate-200 bg-white">
       <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         <div class="flex items-center gap-3">
@@ -54,26 +59,27 @@ function handleReset() {
       </div>
     </header>
 
-    <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+    <main class="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
       <ProfilingForm
         v-if="step === 'profiling'"
         @completed="handleProfilingCompleted"
       />
       <SurveyForm
         v-else-if="step === 'assessment'"
-        :company-name="companyName"
-        :profile="profile"
+        :survey-context="surveyContext"
         @submitted="handleSubmitted"
         @back="handleBack"
       />
       <RadarChart
-        v-else-if="step === 'results' && radarData"
-        :categories="radarData.radarData.categories"
-        :scores="radarData.radarData.scores"
-        :coverage="radarData.radarData.coverage"
-        :company-name="companyName"
+        v-else-if="step === 'results' && submissionResult"
+        :categories="submissionResult.radarData.categories"
+        :scores="submissionResult.radarData.scores"
+        :coverage="submissionResult.radarData.coverage"
+        :display-name="submissionResult.displayName"
+        :submission-reference="submissionResult.submissionReference"
         @reset="handleReset"
       />
     </main>
+    <SiteFooter />
   </div>
 </template>

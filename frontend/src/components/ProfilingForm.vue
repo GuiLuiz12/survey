@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import type { IProfilingQuestion, ICompanyProfile } from '../types'
+import type { IProfilingQuestion, ICompanyProfile, ISurveyContext } from '../types'
 import { getProfilingQuestions } from '../services/api'
 
 const emit = defineEmits<{
-  completed: [companyName: string, profile: ICompanyProfile]
+  completed: [context: ISurveyContext]
 }>()
 
 const questions = ref<IProfilingQuestion[]>([])
 const companyName = ref('')
+const contactEmail = ref('')
 const answers = ref<ICompanyProfile>({})
 const loading = ref(true)
 const error = ref('')
 
 const allAnswered = computed(() => {
-  if (companyName.value.trim().length === 0) return false
-  return questions.value.every(q => {
+  return questions.value.length > 0 && questions.value.every(q => {
     const val = answers.value[q.id]
     if (q.multiSelect) return Array.isArray(val) && val.length > 0
     return typeof val === 'string' && val.length > 0
@@ -44,7 +44,11 @@ function isOptionSelected(questionId: string, option: string): boolean {
 
 function handleNext() {
   if (!allAnswered.value) return
-  emit('completed', companyName.value.trim(), { ...answers.value })
+  emit('completed', {
+    companyName: companyName.value.trim() || undefined,
+    contactEmail: contactEmail.value.trim() || undefined,
+    profile: { ...answers.value },
+  })
 }
 
 onMounted(async () => {
@@ -73,18 +77,36 @@ onMounted(async () => {
       </p>
     </div>
 
-    <!-- Company Name -->
-    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <label for="companyName" class="block text-sm font-semibold text-slate-700 mb-2">
-        Nome da Empresa
-      </label>
-      <input
-        id="companyName"
-        v-model="companyName"
-        type="text"
-        placeholder="Digite o nome da empresa avaliada"
-        class="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
-      />
+    <!-- Company Details -->
+    <div class="grid gap-6 md:grid-cols-2">
+      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <label for="companyName" class="block text-sm font-semibold text-slate-700 mb-2">
+          Nome da Empresa <span class="font-normal text-slate-400">(opcional)</span>
+        </label>
+        <input
+          id="companyName"
+          v-model="companyName"
+          type="text"
+          placeholder="Digite o nome da empresa avaliada"
+          class="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
+        />
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <label for="contactEmail" class="block text-sm font-semibold text-slate-700 mb-2">
+          E-mail para contato futuro <span class="font-normal text-slate-400">(opcional)</span>
+        </label>
+        <input
+          id="contactEmail"
+          v-model="contactEmail"
+          type="email"
+          placeholder="seu-email@dominio.com"
+          class="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
+        />
+        <p class="mt-2 text-xs text-slate-500">
+          Usaremos este e-mail apenas se você desejar um contato futuro sobre a resposta enviada.
+        </p>
+      </div>
     </div>
 
     <!-- Questions -->

@@ -100,5 +100,16 @@ export const profilingQuestions: IProfilingQuestion[] = [
       "Realiza testes de forma contínua ou possui certificações ativas (ex: ISO 27001, SOC 2)."
     ],
     multiSelect: false
+  },
+  {
+    id: "PROFILE-06",
+    question: "Qual o seu cargo na empresa avaliada?",
+    options: [
+      "Analista/Técnico",
+      "Gerente/Coordenador",
+      "Diretor/Superintendente",
+      "Consultor/Especialista"
+    ],
+    multiSelect: false
   }
 ];

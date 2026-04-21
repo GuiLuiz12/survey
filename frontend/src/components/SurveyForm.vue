@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import type { IRequirement, IRadarDataResponse, ICompanyProfile } from '../types'
+import type { IRequirement, IRadarDataResponse, ISurveyContext } from '../types'
 import { getRequirements, submitSurvey } from '../services/api'
 
 const props = defineProps<{
-  companyName: string
-  profile: ICompanyProfile
+  surveyContext: ISurveyContext
 }>()
 
 const emit = defineEmits<{
-  submitted: [data: IRadarDataResponse, companyName: string]
+  submitted: [data: IRadarDataResponse]
   back: []
 }>()
 
@@ -74,11 +73,12 @@ async function handleSubmit() {
 
   try {
     const result = await submitSurvey({
-      companyName: props.companyName,
-      profile: props.profile,
+      companyName: props.surveyContext.companyName,
+      contactEmail: props.surveyContext.contactEmail,
+      profile: props.surveyContext.profile,
       answers: answers.value,
     })
-    emit('submitted', result, props.companyName)
+    emit('submitted', result)
   } catch (err: any) {
     error.value = err.response?.data?.error || 'Failed to submit survey. Please try again.'
   } finally {

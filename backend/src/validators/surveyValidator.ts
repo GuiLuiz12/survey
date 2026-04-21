@@ -3,6 +3,7 @@ import { ISurveyPayload } from '../interfaces';
 import { ValidationError } from '../errors';
 
 export const CATEGORIES = ['PO', 'PS', 'PW', 'RV'] as const;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const profilingMap = new Map(profilingQuestions.map(q => [q.id, q]));
 
@@ -85,10 +86,22 @@ function validateAnswers(payload: ISurveyPayload): void {
 }
 
 export function validateSurveyPayload(payload: ISurveyPayload): void {
-  const { companyName } = payload;
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new ValidationError('payload must be an object.');
+  }
 
-  if (!companyName || typeof companyName !== 'string' || companyName.trim().length === 0) {
-    throw new ValidationError('companyName is required.');
+  const { companyName, contactEmail } = payload;
+
+  if (companyName !== undefined && typeof companyName !== 'string') {
+    throw new ValidationError('companyName must be a string when provided.');
+  }
+
+  if (contactEmail !== undefined && typeof contactEmail !== 'string') {
+    throw new ValidationError('contactEmail must be a string when provided.');
+  }
+
+  if (typeof contactEmail === 'string' && contactEmail.trim().length > 0 && !emailRegex.test(contactEmail.trim())) {
+    throw new ValidationError('contactEmail must be a valid email address.');
   }
 
   validateProfile(payload);

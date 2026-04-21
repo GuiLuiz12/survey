@@ -17,7 +17,8 @@ export interface ICompanyProfile {
 }
 
 export interface ISurveyPayload {
-  companyName: string;
+  companyName?: string;
+  contactEmail?: string;
   profile: ICompanyProfile;
   answers: Record<string, number | null>;
 }
@@ -31,6 +32,8 @@ export interface CalculatedScores {
 
 export interface IRadarDataResponse {
   message: string;
+  displayName: string;
+  submissionReference: string;
   radarData: {
     categories: string[];
     scores: number[];

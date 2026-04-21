@@ -5,7 +5,8 @@ const props = defineProps<{
   categories: string[]
   scores: number[]
   coverage: number[]
-  companyName: string
+  displayName: string
+  submissionReference: string
 }>()
 
 const emit = defineEmits<{
@@ -88,7 +89,7 @@ const chartOptions = computed(() => ({
 
 const series = computed(() => [
   {
-    name: props.companyName,
+    name: props.displayName,
     data: props.scores,
   },
 ])
@@ -98,7 +99,14 @@ const series = computed(() => [
   <div class="space-y-6">
     <div class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
       <h2 class="text-2xl font-bold text-slate-800 text-center mb-2">SDLC Maturity Assessment</h2>
-      <p class="text-center text-slate-500 mb-8">{{ companyName }}</p>
+      <p class="text-center text-slate-500">{{ displayName }}</p>
+      <div class="mx-auto mt-6 mb-8 max-w-xl rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-4 text-center">
+        <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600">Código de Referência</p>
+        <p class="mt-2 text-xl font-bold text-slate-900">{{ submissionReference }}</p>
+        <p class="mt-2 text-sm text-slate-600">
+          Guarde este código para entrar em contato sobre os dados desta resposta.
+        </p>
+      </div>
       <apexchart
         type="radar"
         height="450"
