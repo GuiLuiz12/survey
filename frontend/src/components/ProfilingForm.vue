@@ -72,7 +72,7 @@ onMounted(async () => {
     <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-6">
       <h2 class="text-lg font-bold text-slate-800 mb-2">Questionário de Perfilamento Inicial</h2>
       <p class="text-sm text-slate-600 leading-relaxed">
-        Antes de iniciar a avaliação de maturidade, precisamos entender o perfil da sua empresa.
+        Antes de iniciar a avaliação de maturidade, precisamos entender o perfil da está sendo avaliada.
         Essas informações ajudarão a contextualizar os resultados.
       </p>
     </div>

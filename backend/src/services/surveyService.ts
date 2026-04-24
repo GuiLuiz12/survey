@@ -1,8 +1,8 @@
+import { randomInt } from 'node:crypto';
 import { requirementsList, requirementMapping, profilingQuestions } from '../data';
 import { IRadarDataResponse, IRequirement, IProfilingQuestion, ISurveyPayload, CalculatedScores } from '../interfaces';
 import { validateSurveyPayload, CATEGORIES } from '../validators/surveyValidator';
 import Survey from '../models/Survey';
-import Counter from '../models/Counter';
 
 const categorySize: Record<string, number> = {};
 for (const cat of Object.values(requirementMapping)) {
@@ -27,19 +27,15 @@ function formatSubmissionReference(referenceNumber: number): string {
   return `SDLC-${String(referenceNumber).padStart(6, '0')}`;
 }
 
-async function getNextReferenceNumber(): Promise<number> {
-  const counter = await Counter.findByIdAndUpdate(
-    'surveyReference',
-    { $inc: { value: 1 } },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
-  );
-
-  if (!counter) {
-    throw new Error('Failed to allocate survey reference number.');
-  }
-
-  return counter.value;
+function generateSixDigitReference(): number {
+  return randomInt(100_000, 1_000_000);
 }
+
+function isDuplicateKeyError(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && 'code' in err && (err as { code: number }).code === 11000;
+}
+
+const MAX_REFERENCE_ATTEMPTS = 20;
 
 export async function submitSurvey(payload: ISurveyPayload): Promise<IRadarDataResponse> {
   validateSurveyPayload(payload);
@@ -72,19 +68,35 @@ export async function submitSurvey(payload: ISurveyPayload): Promise<IRadarDataR
     coverageValues.push(round1(coverage));
   }
 
-  const referenceNumber = await getNextReferenceNumber();
-  const submissionReference = formatSubmissionReference(referenceNumber);
+  let referenceNumber = 0;
+  let submissionReference = '';
 
-  const survey = new Survey({
-    companyName: normalizedCompanyName,
-    contactEmail: normalizedContactEmail,
-    referenceNumber,
-    profile,
-    rawAnswers: new Map(Object.entries(answers)),
-    calculatedScores,
-  });
+  for (let attempt = 0; attempt < MAX_REFERENCE_ATTEMPTS; attempt++) {
+    referenceNumber = generateSixDigitReference();
+    submissionReference = formatSubmissionReference(referenceNumber);
 
-  await survey.save();
+    const survey = new Survey({
+      companyName: normalizedCompanyName,
+      contactEmail: normalizedContactEmail,
+      referenceNumber,
+      profile,
+      rawAnswers: new Map(Object.entries(answers)),
+      calculatedScores,
+    });
+
+    try {
+      await survey.save();
+      break;
+    } catch (err) {
+      if (isDuplicateKeyError(err) && attempt < MAX_REFERENCE_ATTEMPTS - 1) {
+        continue;
+      }
+      if (isDuplicateKeyError(err)) {
+        throw new Error('Failed to allocate unique survey reference number.');
+      }
+      throw err;
+    }
+  }
 
   return {
     message: 'Survey submitted successfully.',
