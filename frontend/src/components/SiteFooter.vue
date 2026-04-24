@@ -22,7 +22,7 @@
               class="font-medium text-indigo-700 decoration-indigo-300"
             >
               guilherme.luiz.sdlc@gmail.com
-            </a>.
+            </a>
           </p>
           <p class="text-slate-500">
             <span class="font-medium text-slate-700">Nota:</span>
