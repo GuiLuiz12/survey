@@ -148,7 +148,7 @@ const series = computed(() => [
         @click="emit('reset')"
         class="rounded-xl border-2 border-indigo-600 px-8 py-3 text-base font-semibold text-indigo-600 transition hover:bg-indigo-50"
       >
-        New Assessment
+        Nova Auditoria
       </button>
     </div>
   </div>
