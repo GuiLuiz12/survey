@@ -27,6 +27,8 @@ function coveragePercent(idx: number): string {
 const chartOptions = computed(() => ({
   chart: {
     type: 'radar' as const,
+    width: '100%',
+    offsetX: 0,
     toolbar: { show: false },
     dropShadow: {
       enabled: true,
@@ -34,6 +36,14 @@ const chartOptions = computed(() => ({
       left: 1,
       top: 1,
       opacity: 0.1,
+    },
+  },
+  grid: {
+    padding: {
+      top: 8,
+      right: 20,
+      bottom: 8,
+      left: 20,
     },
   },
   xaxis: {
@@ -98,7 +108,7 @@ const series = computed(() => [
 <template>
   <div class="space-y-6">
     <div class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h2 class="text-2xl font-bold text-slate-800 text-center mb-2">SDLC Maturity Assessment</h2>
+      <h2 class="text-2xl font-bold text-slate-800 text-center mb-2">Auditoria de Maturidade de Secure SDLC</h2>
       <p class="text-center text-slate-500">{{ displayName }}</p>
       <div class="mx-auto mt-6 mb-8 max-w-xl rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-4 text-center">
         <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600">Código de Referência</p>
@@ -107,12 +117,16 @@ const series = computed(() => [
           Guarde este código para entrar em contato sobre os dados desta resposta.
         </p>
       </div>
-      <apexchart
-        type="radar"
-        height="450"
-        :options="chartOptions"
-        :series="series"
-      />
+      <div class="flex w-full min-w-0 justify-center">
+        <div class="w-full max-w-2xl">
+          <apexchart
+            type="radar"
+            height="450"
+            :options="chartOptions"
+            :series="series"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Score Cards -->
